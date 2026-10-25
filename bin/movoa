@@ -1,0 +1,20 @@
+#!/usr/bin/env lua
+-- movoa "a prompt"                     -> clip URL (MiniMax H3, with sound)
+-- movoa --image <url> "a prompt"       -> clip URL, photo to video
+-- movoa --credits                      -> remaining credits
+local movoa = require("movoa")
+local function die(err) io.stderr:write(err.kind .. ": " .. err.message .. "\n"); os.exit(err.kind == "auth" and 3 or 1) end
+if arg[1] == "--credits" then
+  local n, err = movoa.credits()
+  if not n then die(err) end
+  print(n); os.exit(0)
+end
+local opts, prompt = {}, arg[1]
+if arg[1] == "--image" then opts.image_url, prompt = arg[2], arg[3] end
+if not prompt then
+  io.stderr:write('usage: movoa [--image <url>] "prompt" | movoa --credits   (set MOVOA_API_KEY)\n')
+  os.exit(2)
+end
+local url, err = movoa.generate_video(prompt, opts)
+if not url then die(err) end
+print(url)
